@@ -52,8 +52,25 @@ class MDP:
         The easiest way to do this will involve sampling.
         """
 
-        #TODO YOUR CODE HERE
-        raise NotImplementedError()
+        # Sample Size Constant
+        SAMPLE_SIZE = 1000
+
+        # Count result locations
+        counts = LocationCounts(self.game_state.grid_size)
+
+        # Iterate through all samples
+        for _ in range(SAMPLE_SIZE):
+
+            # Use Sample function to sample 
+            sample = source.sample()
+
+            # Apply transition model to the sample
+            result = self.transition_model(sample, action).sample()
+
+            counts.add_count(result)
+
+        # Normalize counts to get probabilities
+        return counts.normalize()
 
 
 class LocationValues:
@@ -70,11 +87,63 @@ class LocationValues:
         Perform one update of value iteration based off of the provided MDP.
         """
 
-        next_value_grid = [[0.0 for _ in range(self.mdp.game_state.grid_size[1])] for _ in range(self.mdp.game_state.grid_size[1])]
+        rows, cols = self.mdp.game_state.grid_size
+        next_value_grid = [[0.0 for _ in range(cols)] for _ in range(rows)]
+
+        for row in range(rows):
+            for col in range(cols):
+
+                curr_location = Location(row, col)
 
 
-        #TODO YOUR CODE HERE, CALCULATE NEXT VALUE AS A FUNCTION OF PREVIOUS VALUE
-        raise NotImplementedError()
+                # Set entity's state to current location 
+                state_at_location = self.mdp.game_state.replace_active_entity_location(curr_location)
+
+
+                # If the current location is lava or portal, skip
+                if isinstance(self.mdp.game_state.tile_grid[row][col], (Lava, Portal)):
+                    continue
+
+
+                # Get potential successors and actions at each ---------------------
+
+                successors = GameTransitions.get_successors(state_at_location)
+
+                actions = [a for a, _ in successors]
+
+                # ------------------------------------------------------------------
+
+
+                q_vals = []
+
+                # Iterate through all possible actions & compute Q-val using Bellman equation
+                for action in actions:
+
+                    distance = self.mdp.transition_model(curr_location, action)
+
+                    gamma = self.mdp.discount
+                    q_val = 0.0
+
+                    # Iterate through all possible S'
+                    for s_prime in distance.locations():
+
+                        value_s_prime = self.value_grid[s_prime.row][s_prime.col]
+                        reward = self.mdp.reward(
+                            state_at_location,
+                            self.mdp.game_state.replace_active_entity_location(s_prime), 
+                            action
+                        )
+
+                        q_val += distance.probability(s_prime) * (reward + gamma * value_s_prime)
+
+                    q_vals.append(q_val)
+
+                # Only take max if q_vals isn't empty (walkable tile)
+                if q_vals:
+                    next_value_grid[row][col] = max(q_vals)
+
+        
+        self.value_grid = next_value_grid
 
         return next_value_grid
 
