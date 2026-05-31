@@ -218,10 +218,33 @@ class MDPAgent(UncertainAgent):
             # 4. You can find the distribution of the results of an action for a given specific location
             # 5. You can calculate the reward of a specific transition as a result of a specific action with a specific result
             # 6. You have an estimate of the value of each result location
-        #TODO YOUR CODE HERE
-        raise NotImplementedError()
-        action = WizardMoves.RIGHT
+        
+        # Initialize best action and best expected val
+        best_action = None
+        best_value = float('-inf')
 
-        #When choosing an action, we must update our prior to account for the new distribution as a result of the action being taken
+        # Go through all possible WizardMoves
+        for action in WizardMoves:
+
+
+            distance = self.mdp.transition_distribution(self.current_position_estimate, action)
+
+            expected_value = 0.0
+
+            # Calculate expected values for each possible location
+            for loc in distance.locations():
+
+                expected_value += distance.probability(loc) * self.values.value_grid[loc.row][loc.col]
+
+            
+            # Update best expected value if newly found is better
+            if expected_value > best_value:
+                best_value = expected_value
+                best_action = action
+
+        action = best_action
+
+            
+        # When choosing an action, we must update our prior to account for the new distribution as a result of the action being taken
         self.update_prior(action)
         return action

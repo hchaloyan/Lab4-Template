@@ -1,4 +1,4 @@
-from lab3 import MDPAgent
+from lab4 import MDPAgent
 import sys
 import time
 from enum import Enum

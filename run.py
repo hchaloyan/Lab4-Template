@@ -4,7 +4,7 @@ from agents import (
 from model import  Wizard
 import pyglet
 
-from lab3 import ( MDPAgent, MDP)
+from lab4 import ( MDPAgent, MDP)
 
 
 from game import MDPGame
