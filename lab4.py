@@ -124,17 +124,37 @@ class LocationValues:
                     gamma = self.mdp.discount
                     q_val = 0.0
 
+                    
+                    # Parse directions from action
+                    direction_row, direction_col = action.value
+
+                    target_location = Location(curr_location.row + direction_row, curr_location.col + direction_col)
+
+                    # Check bounds
+                    if (0 <= target_location.row < rows and 0 <= target_location.col < cols):
+
+                        tile = self.mdp.game_state.tile_grid[target_location.row][target_location.col]
+                        
+                        # Set gamestate corresponding to type of tile 
+                        if isinstance(tile, Lava):
+                            reward_state = self.mdp.game_state.replace_active_entity_location(target_location)
+                        elif isinstance(tile, Portal):
+                            reward_state = state_at_location.win()
+                        else:
+                            reward_state = self.mdp.game_state.replace_active_entity_location(target_location)
+                    # If no action in bounds at all, stay at same spot
+                    else:
+                        target_location = state_at_location
+
+                    # Calculate reward by comparing current state to potential state after action
+                    reward = self.mdp.reward(state_at_location, reward_state, action)         
+
                     # Iterate through all possible S'
                     for s_prime in distance.locations():
 
                         value_s_prime = self.value_grid[s_prime.row][s_prime.col]
-                        reward = self.mdp.reward(
-                            state_at_location,
-                            self.mdp.game_state.replace_active_entity_location(s_prime), 
-                            action
-                        )
-
                         q_val += distance.probability(s_prime) * (reward + gamma * value_s_prime)
+
 
                     q_vals.append(q_val)
 
