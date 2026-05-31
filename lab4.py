@@ -76,7 +76,7 @@ class MDP:
 class LocationValues:
     def __init__(self, mdp: MDP):
         self.mdp = mdp
-        self.value_grid = [[0.0 for _ in range(mdp.game_state.grid_size[1])] for _ in range(mdp.game_state.grid_size[1])]
+        self.value_grid = [[0.0 for _ in range(mdp.game_state.grid_size[1])] for _ in range(mdp.game_state.grid_size[0])]
 
     def value_iteration(self,k):
         for _ in range(k):
@@ -88,7 +88,7 @@ class LocationValues:
         """
 
         rows, cols = self.mdp.game_state.grid_size
-        next_value_grid = [[0.0 for _ in range(cols)] for _ in range(rows)]
+        next_value_grid = [[0.0 for _ in range(self.mdp.game_state.grid_size[1])] for _ in range(self.mdp.game_state.grid_size[0])]
 
         for row in range(rows):
             for col in range(cols):

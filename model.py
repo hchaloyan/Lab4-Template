@@ -285,7 +285,8 @@ class GameTransitions:
                         (
                             source.replace_entity(
                                 wizard_loc.row, wizard_loc.col, EmptyEntity()
-                            ).replace_score(0)
+                            ).replace_active_entity_location(target)
+                            .replace_score(0)
                             .lose()
                         )
                         .advance_turn()
@@ -302,6 +303,7 @@ class GameTransitions:
                             source.replace_entity(
                                 wizard_loc.row, wizard_loc.col, EmptyEntity()
                             )
+                            .replace_active_entity_location(target)
                             .win()
                         )
                         .advance_turn()
